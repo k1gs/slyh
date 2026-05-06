@@ -1,0 +1,34 @@
+[package]
+name = "slyh"
+version = "1.0.0"
+edition = "2024"
+description = "Simple crossplatform audio player"
+keywords = ["audio", "player"]
+license = "MIT"
+readme = "README.md"
+homepage = "https://slyh.arabianq.ru"
+repository = "https://github.com/arabianq/slyh"
+
+[dependencies]
+anyhow = "1.0.102"
+rust-i18n = "4.0.0"
+clap = { version = "4.6.1", default-features = true, features = ["derive"] }
+sys-locale = "0.3.2"
+rfd = "0.17.2"
+
+egui = { version = "0.34.2", default-features = false, features = [
+    "default_fonts",
+] }
+eframe = { version = "0.34.2", default-features = false, features = [
+    "default_fonts",
+    "glow",
+    "wayland",
+    "x11",
+] }
+egui_material_icons = "0.6.0"
+egui-notify = "0.22.0"
+
+rodio = { git = "https://github.com/RustAudio/rodio.git", rev = "1f927962ab9018ec391972a3a3690c8ae1970218", features = [
+    "symphonia-libopus",
+] }
+lofty = "0.24.0"

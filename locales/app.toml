@@ -1,0 +1,28 @@
+_version = 2
+
+[message.welcome]
+en = "Drag file here or click to open file dialog."
+
+[file_dialog.filter_name]
+en = "Audio files"
+
+[ui.unknown_artist]
+en = "Unknown Artist"
+
+[ui.unknown_album]
+en = "Unknown Album"
+
+[errors.initialization_failed]
+en = "Failed to initialize audio player: %{error}"
+
+[errors.playback_failed]
+en = "Failed to play audio: %{error}"
+
+[errors.file_open_failed]
+en = "Failed to open file: %{error}"
+
+[errors.read_tags_failed]
+en = "Failed to read file tags: %{error}"
+
+[errors.seek_failed]
+en = "Failed to seek audio: %{error}"
