@@ -3,6 +3,9 @@ _version = 2
 [message.welcome]
 en = "Drag file here or click to open file dialog."
 
+[message.path_copied]
+en = "Path copied to clipboard"
+
 [file_dialog.filter_name]
 en = "Audio files"
 

@@ -47,11 +47,19 @@ impl Application {
     }
 
     fn header(&mut self, ui: &mut Ui) {
-        let footer_label =
-            Label::new(RichText::new(self.file_path_normilized.as_ref().unwrap()).size(16.0))
-                .truncate();
         ui.with_layout(Layout::left_to_right(Align::Center), |ui| {
+            let footer_label =
+                Label::new(RichText::new(self.file_path_normilized.as_ref().unwrap()).size(16.0))
+                    .truncate();
             ui.add(footer_label);
+
+            let copy_path_button =
+                Button::new(RichText::new(icons::ICON_FILE_COPY.codepoint).size(12.0)).frame(false);
+            if ui.add(copy_path_button).clicked() {
+                ui.ctx()
+                    .copy_text(self.file_path_normilized.clone().unwrap_or_default());
+                self.toasts.success(t!("message.path_copied"));
+            }
         });
     }
 
