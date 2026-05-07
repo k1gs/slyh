@@ -134,11 +134,6 @@ impl Application {
 
                     let mut volume = sink.volume();
 
-                    let volume_slider = Slider::new(&mut volume, 0.0..=1.0).show_value(false);
-                    if ui.add(volume_slider).dragged() {
-                        sink.set_volume(volume);
-                    }
-
                     let volume_button = Button::new(
                         RichText::new(if volume == 0.0 {
                             icons::ICON_VOLUME_OFF.codepoint
@@ -147,11 +142,12 @@ impl Application {
                         } else {
                             icons::ICON_VOLUME_UP.codepoint
                         })
-                        .size(16.0),
+                        .size(24.0),
                     )
                     .frame(false);
 
-                    if ui.add(volume_button).clicked() {
+                    let volume_btn_response = ui.add(volume_button);
+                    if volume_btn_response.clicked() {
                         if volume == 0.0 {
                             sink.set_volume(self.volume_before_mute);
                         } else {
@@ -159,6 +155,13 @@ impl Application {
                             sink.set_volume(0.0);
                         }
                     }
+
+                    volume_btn_response.on_hover_ui(|ui| {
+                        let volume_slider = Slider::new(&mut volume, 0.0..=1.0).show_value(false);
+                        if ui.add(volume_slider).dragged() {
+                            sink.set_volume(volume);
+                        }
+                    });
                 });
 
                 ui.scope(|ui| {
