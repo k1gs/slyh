@@ -19,6 +19,7 @@ enum Action {
     OpenFile,
     ReadFileProps,
     PlayFile,
+    StartNewInstance(PathBuf),
 }
 
 struct AudioProperties {

@@ -47,27 +47,21 @@ impl Application {
         }
 
         ui.input(|i| {
-            if let Some(dropped_file) = i.raw.dropped_files.first() {
-                let dropped_file = dropped_file.clone();
-                if let Some(path) = dropped_file.path {
-                    self.file_path = Some(path.clone());
-                    self.file_path_normilized =
-                        Some(path.to_string_lossy().nfc().collect::<String>());
-                    self.actions.push(Action::ReadFileProps);
-                    self.actions.push(Action::PlayFile);
+            for idx in 0..i.raw.dropped_files.len() {
+                let dropped_file = &i.raw.dropped_files[idx];
+                if let Some(path) = &dropped_file.path {
+                    if idx == 0 {
+                        self.file_path = Some(path.clone());
+                        self.file_path_normilized =
+                            Some(path.to_string_lossy().nfc().collect::<String>());
+                        self.actions.push(Action::ReadFileProps);
+                        self.actions.push(Action::PlayFile);
+                    } else {
+                        self.actions.push(Action::StartNewInstance(path.clone()));
+                    }
                 }
             }
         });
-
-        // let is_hovering_file = ui.input(|i| !i.raw.hovered_files.is_empty());
-        // ui.input(|i| {
-        //     if !i.raw.dropped_files.is_empty() {
-        //         println!("{:?}", i.raw.dropped_files);
-        //     }
-        //     if !i.raw.hovered_files.is_empty() {
-        //         println!("{:?}", i.raw.hovered_files);
-        //     }
-        // });
     }
 
     fn header(&mut self, ui: &mut Ui) {

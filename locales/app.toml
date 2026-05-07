@@ -26,3 +26,6 @@ en = "Failed to read file properties: %{error}"
 
 [errors.seek_failed]
 en = "Failed to seek audio: %{error}"
+
+[errors.new_instance_failed]
+en = "Failed to start Slyh instance: %{error}"

@@ -9,7 +9,7 @@ use lofty::{
 use rfd::FileDialog;
 use rodio::Source;
 use rust_i18n::t;
-use std::fs;
+use std::{env, fs, path::Path, process::Command};
 use unicode_normalization::UnicodeNormalization;
 
 impl Application {
@@ -58,6 +58,16 @@ impl Application {
                         Err(e) => {
                             self.toasts
                                 .error(t!("errors.playback_failed", error = e.to_string()));
+                            self.file_path = None;
+                        }
+                    };
+                }
+                Action::StartNewInstance(file_path) => {
+                    match self.start_new_instance(&file_path) {
+                        Ok(_) => (),
+                        Err(e) => {
+                            self.toasts
+                                .error(t!("errors.new_instance_failed", error = e.to_string()));
                             self.file_path = None;
                         }
                     };
@@ -144,6 +154,17 @@ impl Application {
         self.audio_props.duration = source.total_duration().unwrap_or_default().as_secs();
         self.audio_sink.as_ref().unwrap().append(source);
         self.is_finished = false;
+
+        Ok(())
+    }
+
+    fn start_new_instance(&self, file_path: &Path) -> Result<()> {
+        let exe_path = match env::current_exe() {
+            Ok(path) => path,
+            Err(e) => return Err(anyhow!(e)),
+        };
+
+        Command::new(&exe_path).arg(&file_path).spawn()?;
 
         Ok(())
     }
