@@ -121,20 +121,22 @@ impl Application {
     }
 
     fn open_file(&mut self) -> Result<()> {
-        let file = FileDialog::new()
+        let files = FileDialog::new()
             .add_filter(t!("file_dialog.filter_name"), SUPPORTED_AUDIO_FORMATS)
-            .pick_file();
+            .pick_files()
+            .unwrap_or_default();
 
-        if file.is_none() {
-            return Err(anyhow!("No file selected"));
+        for i in 0..files.len() {
+            let file = &files[i];
+            if i == 0 {
+                self.file_path = Some(file.clone());
+                self.file_path_normilized = Some(file.to_string_lossy().nfc().collect::<String>());
+                self.actions.push(Action::ReadFileProps);
+                self.actions.push(Action::PlayFile);
+            } else {
+                self.actions.push(Action::StartNewInstance(file.clone()));
+            }
         }
-
-        let file = file.unwrap();
-        self.file_path = Some(file.clone());
-        self.file_path_normilized = Some(file.to_string_lossy().nfc().collect::<String>());
-
-        self.actions.push(Action::ReadFileProps);
-        self.actions.push(Action::PlayFile);
 
         Ok(())
     }
