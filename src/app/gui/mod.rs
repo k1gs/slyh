@@ -3,7 +3,7 @@ mod ui;
 
 use anyhow::{Result, anyhow};
 use eframe::{Frame, HardwareAcceleration, NativeOptions};
-use egui::{Context, Ui, ViewportBuilder, vec2};
+use egui::{Context, FontData, FontDefinitions, FontFamily, FontTweak, Ui, ViewportBuilder, vec2};
 use egui_notify::Toasts;
 use rodio::{MixerDeviceSink, Player};
 use std::path::PathBuf;
@@ -71,6 +71,37 @@ impl eframe::App for Application {
     }
 }
 
+fn setup_custom_fonts(ctx: &Context) {
+    let mut fonts = FontDefinitions::default();
+    let custom_font_key = "default_custom_font";
+
+    let font_data = FontData::from_static(include_bytes!(
+        "../../../assets/Curtsweeper-Regular.otf"
+    ))
+    .tweak(FontTweak {
+        hinting_override: Some(true),
+        ..Default::default()
+    });
+
+    fonts
+        .font_data
+        .insert(custom_font_key.to_owned(), font_data.into());
+
+    fonts
+        .families
+        .entry(FontFamily::Proportional)
+        .or_default()
+        .insert(0, custom_font_key.to_owned());
+
+    fonts
+        .families
+        .entry(FontFamily::Monospace)
+        .or_default()
+        .insert(0, custom_font_key.to_owned());
+
+    ctx.set_fonts(fonts);
+}
+
 pub fn run_gui(file_path: Option<PathBuf>) -> Result<()> {
     let options = NativeOptions {
         vsync: true,
@@ -89,6 +120,7 @@ pub fn run_gui(file_path: Option<PathBuf>) -> Result<()> {
         options,
         Box::new(|cc| {
             egui_material_icons::initialize(&cc.egui_ctx);
+            setup_custom_fonts(&cc.egui_ctx);
             Ok(Box::new(Application::new(file_path)))
         }),
     ) {

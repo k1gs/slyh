@@ -53,15 +53,17 @@ impl Application {
 
     fn header(&mut self, ui: &mut Ui) {
         let footer_label =
-            Label::new(RichText::new(self.file_path_normilized.as_ref().unwrap()).size(8.0))
+            Label::new(RichText::new(self.file_path_normilized.as_ref().unwrap()).size(10.0))
                 .truncate();
-        ui.with_layout(Layout::left_to_right(Align::Min), |ui| {
+        ui.with_layout(Layout::left_to_right(Align::Center), |ui| {
             ui.add(footer_label);
         });
     }
 
     fn footer(&mut self, ui: &mut Ui) {
-        ui.with_layout(Layout::right_to_left(Align::Max), |ui| {
+        let sink = self.audio_sink.as_ref().unwrap();
+
+        ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
             fn format_time_pair(position: f32, duration: f32) -> String {
                 fn format_time(seconds: f32) -> String {
                     let total_seconds = seconds.round() as u32;
@@ -77,7 +79,7 @@ impl Application {
                 format_time_pair(self.audio_position as f32, self.audio_duration as f32);
 
             let progress_label =
-                Label::new(RichText::new(progress_text).size(16.0)).selectable(false);
+                Label::new(RichText::new(progress_text).size(8.0)).selectable(false);
             ui.add(progress_label);
 
             ui.spacing_mut().slider_width = 80.0;
