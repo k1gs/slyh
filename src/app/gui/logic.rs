@@ -1,7 +1,7 @@
 use crate::app::gui::{Action, Application, SUPPORTED_AUDIO_FORMATS};
 use anyhow::{Result, anyhow};
 use eframe::Frame;
-use egui::Context;
+use egui::{Context, Key};
 use lofty::{
     file::{AudioFile, TaggedFileExt},
     probe::Probe as LoftyProbe,
@@ -75,22 +75,7 @@ impl Application {
             }
         }
 
-        ctx.input(|i| {
-            for idx in 0..i.raw.dropped_files.len() {
-                let dropped_file = &i.raw.dropped_files[idx];
-                if let Some(path) = &dropped_file.path {
-                    if idx == 0 {
-                        self.file_path = Some(path.clone());
-                        self.file_path_normilized =
-                            Some(path.to_string_lossy().nfc().collect::<String>());
-                        self.actions.push(Action::ReadFileProps);
-                        self.actions.push(Action::PlayFile);
-                    } else {
-                        self.actions.push(Action::StartNewInstance(path.clone()));
-                    }
-                }
-            }
-        });
+        self.process_input(ctx);
 
         if let Some(sink) = &self.audio_sink {
             if !sink.is_paused() {
@@ -170,6 +155,7 @@ impl Application {
         let source = rodio::Decoder::try_from(file)?;
 
         self.audio_props.duration = source.total_duration().unwrap_or_default().as_secs();
+        self.audio_sink.as_ref().unwrap().clear();
         self.audio_sink.as_ref().unwrap().append(source);
         self.audio_sink.as_ref().unwrap().play();
         self.is_finished = false;
@@ -186,5 +172,73 @@ impl Application {
         Command::new(&exe_path).arg(file_path).spawn()?;
 
         Ok(())
+    }
+
+    fn process_input(&mut self, ctx: &Context) {
+        ctx.input(|i| {
+            // Process drag and drop
+            for idx in 0..i.raw.dropped_files.len() {
+                let dropped_file = &i.raw.dropped_files[idx];
+                if let Some(path) = &dropped_file.path {
+                    if idx == 0 {
+                        self.file_path = Some(path.clone());
+                        self.file_path_normilized =
+                            Some(path.to_string_lossy().nfc().collect::<String>());
+                        self.actions.push(Action::ReadFileProps);
+                        self.actions.push(Action::PlayFile);
+                    } else {
+                        self.actions.push(Action::StartNewInstance(path.clone()));
+                    }
+                }
+            }
+
+            // Quit on ESC
+            if i.key_pressed(Key::Escape) {
+                std::process::exit(0);
+            }
+
+            // Pause on space
+            if i.key_pressed(Key::Space)
+                && let Some(sink) = &self.audio_sink
+            {
+                match sink.is_paused() {
+                    true => sink.play(),
+                    false => sink.pause(),
+                }
+            }
+
+            // Open file picker on Ctrl + O
+            if i.modifiers.ctrl && i.key_pressed(Key::O) {
+                self.actions.push(Action::OpenFile);
+            }
+
+            // Toggle loop
+            if i.key_pressed(Key::L) {
+                self.is_looped = !self.is_looped;
+            }
+
+            let volume_lower = i.key_pressed(Key::ArrowDown);
+            let volume_higher = i.key_pressed(Key::ArrowUp);
+            if let Some(sink) = &self.audio_sink {
+                let current_volume = sink.volume();
+                let mut new_volume = current_volume - 0.1 * volume_lower as u8 as f32
+                    + 0.1 * volume_higher as u8 as f32;
+                new_volume = new_volume.clamp(0.0, 1.0);
+                sink.set_volume(new_volume);
+            }
+
+            let position_backward = i.key_pressed(Key::ArrowLeft);
+            let position_forward = i.key_pressed(Key::ArrowRight);
+            if (position_backward || position_forward)
+                && let Some(sink) = &self.audio_sink
+            {
+                let current_position = self.audio_props.position;
+                let mut new_position =
+                    current_position - 5 * position_backward as u64 + 5 * position_forward as u64;
+                new_position = new_position.clamp(0, self.audio_props.duration);
+                sink.try_seek(std::time::Duration::from_secs(new_position))
+                    .ok();
+            }
+        });
     }
 }
