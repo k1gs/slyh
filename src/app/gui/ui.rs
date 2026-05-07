@@ -53,7 +53,7 @@ impl Application {
 
     fn header(&mut self, ui: &mut Ui) {
         let footer_label =
-            Label::new(RichText::new(self.file_path_normilized.as_ref().unwrap()).size(10.0))
+            Label::new(RichText::new(self.file_path_normilized.as_ref().unwrap()).size(16.0))
                 .truncate();
         ui.with_layout(Layout::left_to_right(Align::Center), |ui| {
             ui.add(footer_label);
@@ -81,7 +81,7 @@ impl Application {
             );
 
             let progress_label =
-                Label::new(RichText::new(progress_text).size(8.0)).selectable(false);
+                Label::new(RichText::new(progress_text).size(16.0)).selectable(false);
             ui.add(progress_label);
 
             ui.spacing_mut().slider_width = 80.0;
@@ -141,7 +141,7 @@ impl Application {
                     format_type_text, bitrate_text, sample_rate_text, channels_text
                 );
 
-                let info_label = Label::new(RichText::new(info_text).size(8.0)).truncate();
+                let info_label = Label::new(RichText::new(info_text).size(16.0)).truncate();
                 ui.add(info_label);
             });
         });
@@ -160,8 +160,9 @@ impl Application {
                             false => icons::ICON_PAUSE.codepoint,
                         },
                     })
-                    .size(24.0),
-                );
+                    .size(32.0),
+                )
+                .frame(false);
                 if ui.add(play_button).clicked() {
                     if sink.empty() {
                         self.actions.push(Action::PlayFile);
@@ -172,7 +173,8 @@ impl Application {
                     }
                 }
 
-                let stop_button = Button::new(RichText::new(icons::ICON_STOP.codepoint).size(24.0));
+                let stop_button =
+                    Button::new(RichText::new(icons::ICON_STOP.codepoint).size(32.0)).frame(false);
                 if ui.add(stop_button).clicked() {
                     sink.stop();
                 }

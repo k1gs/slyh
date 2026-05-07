@@ -103,6 +103,7 @@ fn setup_custom_fonts(ctx: &Context) {
     ))
     .tweak(FontTweak {
         hinting_override: Some(true),
+        scale: 0.5,
         ..Default::default()
     });
 
