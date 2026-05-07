@@ -126,8 +126,7 @@ impl Application {
             .pick_files()
             .unwrap_or_default();
 
-        for i in 0..files.len() {
-            let file = &files[i];
+        for (i, file) in files.iter().enumerate() {
             if i == 0 {
                 self.file_path = Some(file.clone());
                 self.file_path_normilized = Some(file.to_string_lossy().nfc().collect::<String>());
@@ -183,7 +182,7 @@ impl Application {
             Err(e) => return Err(anyhow!(e)),
         };
 
-        Command::new(&exe_path).arg(&file_path).spawn()?;
+        Command::new(&exe_path).arg(file_path).spawn()?;
 
         Ok(())
     }

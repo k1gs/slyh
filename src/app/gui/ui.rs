@@ -3,7 +3,6 @@ use eframe::Frame;
 use egui::{Align, Button, CentralPanel, Label, Layout, Panel, RichText, Sense, Slider, Ui};
 use egui_material_icons::icons;
 use rust_i18n::t;
-use unicode_normalization::UnicodeNormalization;
 
 impl Application {
     pub fn _ui(&mut self, ui: &mut Ui, _frame: &mut Frame) {
