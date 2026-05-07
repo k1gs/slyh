@@ -3,6 +3,7 @@ use eframe::Frame;
 use egui::{Align, Button, CentralPanel, Label, Layout, Panel, RichText, Sense, Slider, Ui};
 use egui_material_icons::icons;
 use rust_i18n::t;
+use unicode_normalization::UnicodeNormalization;
 
 impl Application {
     pub fn _ui(&mut self, ui: &mut Ui, _frame: &mut Frame) {
@@ -45,10 +46,28 @@ impl Application {
             self.actions.push(Action::OpenFile);
         }
 
-        let is_hovering_file = ui.input(|i| !i.raw.hovered_files.is_empty());
-        if is_hovering_file {
-            todo!("DRAG AND DROP");
-        }
+        ui.input(|i| {
+            if let Some(dropped_file) = i.raw.dropped_files.first() {
+                let dropped_file = dropped_file.clone();
+                if let Some(path) = dropped_file.path {
+                    self.file_path = Some(path.clone());
+                    self.file_path_normilized =
+                        Some(path.to_string_lossy().nfc().collect::<String>());
+                    self.actions.push(Action::ReadFileProps);
+                    self.actions.push(Action::PlayFile);
+                }
+            }
+        });
+
+        // let is_hovering_file = ui.input(|i| !i.raw.hovered_files.is_empty());
+        // ui.input(|i| {
+        //     if !i.raw.dropped_files.is_empty() {
+        //         println!("{:?}", i.raw.dropped_files);
+        //     }
+        //     if !i.raw.hovered_files.is_empty() {
+        //         println!("{:?}", i.raw.hovered_files);
+        //     }
+        // });
     }
 
     fn header(&mut self, ui: &mut Ui) {
