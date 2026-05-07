@@ -75,6 +75,23 @@ impl Application {
             }
         }
 
+        ctx.input(|i| {
+            for idx in 0..i.raw.dropped_files.len() {
+                let dropped_file = &i.raw.dropped_files[idx];
+                if let Some(path) = &dropped_file.path {
+                    if idx == 0 {
+                        self.file_path = Some(path.clone());
+                        self.file_path_normilized =
+                            Some(path.to_string_lossy().nfc().collect::<String>());
+                        self.actions.push(Action::ReadFileProps);
+                        self.actions.push(Action::PlayFile);
+                    } else {
+                        self.actions.push(Action::StartNewInstance(path.clone()));
+                    }
+                }
+            }
+        });
+
         if let Some(sink) = &self.audio_sink {
             if !sink.is_paused() {
                 ctx.request_repaint_after_secs(1.0 / 60.0);
