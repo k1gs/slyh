@@ -1,9 +1,6 @@
 use crate::app::gui::{Action, Application};
 use eframe::Frame;
-use egui::{
-    Align, Button, CentralPanel, Label, Layout, Panel, RichText, Sense, Slider,
-    Ui,
-};
+use egui::{Align, Button, CentralPanel, Label, Layout, Panel, RichText, Sense, Slider, Ui};
 use egui_material_icons::icons;
 use rust_i18n::t;
 
@@ -66,7 +63,32 @@ impl Application {
         });
     }
 
-    fn footer(&mut self, _ui: &mut Ui) {}
+    fn footer(&mut self, ui: &mut Ui) {
+        let sink = self.audio_sink.as_ref().unwrap();
+
+        ui.with_layout(Layout::right_to_left(Align::Max), |ui| {
+            fn format_time_pair(position: f32, duration: f32) -> String {
+                fn format_time(seconds: f32) -> String {
+                    let total_seconds = seconds.round() as u32;
+                    let minutes = total_seconds / 60;
+                    let secs = total_seconds % 60;
+                    format!("{:02}:{:02}", minutes, secs)
+                }
+
+                format!("{}/{}", format_time(position), format_time(duration))
+            }
+
+            let position = match sink.empty() {
+                true => 0,
+                false => sink.get_pos().as_secs(),
+            };
+            let progress_text = format_time_pair(position as f32, self.audio_duration as f32);
+
+            let progress_label =
+                Label::new(RichText::new(progress_text).size(16.0).monospace()).selectable(false);
+            ui.add(progress_label);
+        });
+    }
 
     fn controls(&mut self, ui: &mut Ui) {
         let sink = self.audio_sink.as_ref().unwrap();
@@ -139,28 +161,10 @@ impl Application {
                     ui.spacing_mut().interact_size.y = 24.0;
                     ui.spacing_mut().slider_rail_height = 24.0;
 
-                    fn format_time_pair(position: f32, duration: f32) -> String {
-                        fn format_time(seconds: f32) -> String {
-                            let total_seconds = seconds.round() as u32;
-                            let minutes = total_seconds / 60;
-                            let secs = total_seconds % 60;
-                            format!("{:02}:{:02}", minutes, secs)
-                        }
-
-                        format!("{}/{}", format_time(position), format_time(duration))
-                    }
-
                     let mut position = match sink.empty() {
                         true => 0,
                         false => sink.get_pos().as_secs(),
                     };
-                    let progress_text =
-                        format_time_pair(position as f32, self.audio_duration as f32);
-
-                    let progress_label =
-                        Label::new(RichText::new(progress_text).size(16.0).monospace())
-                            .selectable(false);
-                    ui.add(progress_label);
 
                     ui.spacing_mut().slider_width = ui.available_width();
                     let progress_slider = Slider::new(&mut position, 0..=self.audio_duration)
