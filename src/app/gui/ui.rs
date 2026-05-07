@@ -155,7 +155,7 @@ impl Application {
                             false => icons::ICON_PAUSE.codepoint,
                         },
                     })
-                    .size(32.0),
+                    .size(24.0),
                 )
                 .frame(false);
                 if ui.add(play_button).clicked() {
@@ -169,7 +169,7 @@ impl Application {
                 }
 
                 let stop_button =
-                    Button::new(RichText::new(icons::ICON_STOP.codepoint).size(32.0)).frame(false);
+                    Button::new(RichText::new(icons::ICON_STOP.codepoint).size(24.0)).frame(false);
                 if ui.add(stop_button).clicked() {
                     sink.stop();
                 }
