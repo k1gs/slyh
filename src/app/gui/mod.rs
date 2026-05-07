@@ -7,6 +7,7 @@ use egui::{Context, Ui, ViewportBuilder, vec2};
 use egui_notify::Toasts;
 use rodio::{MixerDeviceSink, Player};
 use std::path::PathBuf;
+use unicode_normalization::UnicodeNormalization;
 
 // This list does not represent all supported formats, just the ones that will be shown in the file dialog.
 const SUPPORTED_AUDIO_FORMATS: &[&str] = &["mp3", "wav", "flac", "ogg", "aac", "opus"];
@@ -20,6 +21,8 @@ enum Action {
 
 struct Application {
     file_path: Option<PathBuf>,
+    file_path_normilized: Option<String>,
+
     actions: Vec<Action>,
 
     audio_duration: u64,
@@ -37,12 +40,15 @@ struct Application {
 impl Application {
     fn new(file_path: Option<PathBuf>) -> Self {
         let mut actions = vec![Action::InitAudioPlayer];
-        if file_path.is_some() {
+        let mut file_path_normilized = None;
+        if let Some(fp) = &file_path {
             actions.push(Action::PlayFile);
+            file_path_normilized = Some(fp.to_string_lossy().nfc().collect::<String>());
         }
 
         Self {
             file_path,
+            file_path_normilized,
             actions,
             audio_duration: 0,
             audio_position: 0,

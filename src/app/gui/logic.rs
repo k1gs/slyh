@@ -6,6 +6,7 @@ use rfd::FileDialog;
 use rodio::Source;
 use rust_i18n::t;
 use std::fs;
+use unicode_normalization::UnicodeNormalization;
 
 impl Application {
     pub fn _logic(&mut self, ctx: &Context, _frame: &mut Frame) {
@@ -81,7 +82,8 @@ impl Application {
         }
 
         let file = file.unwrap();
-        self.file_path = Some(file);
+        self.file_path = Some(file.clone());
+        self.file_path_normilized = Some(file.to_string_lossy().nfc().collect::<String>());
 
         self.actions.push(Action::PlayFile);
 

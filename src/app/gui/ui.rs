@@ -52,12 +52,9 @@ impl Application {
     }
 
     fn header(&mut self, ui: &mut Ui) {
-        let footer_label = Label::new(
-            RichText::new(self.file_path.as_ref().unwrap().to_string_lossy())
-                .size(16.0)
-                .monospace(),
-        )
-        .truncate();
+        let footer_label =
+            Label::new(RichText::new(self.file_path_normilized.as_ref().unwrap()).size(8.0))
+                .truncate();
         ui.with_layout(Layout::left_to_right(Align::Min), |ui| {
             ui.add(footer_label);
         });
