@@ -1,11 +1,10 @@
 use crate::app::gui::{Action, Application};
 use eframe::Frame;
 use egui::{
-    Align, Button, CentralPanel, Color32, Direction, Label, Layout, Panel, RichText, Sense, Slider,
+    Align, Button, CentralPanel, Label, Layout, Panel, RichText, Sense, Slider,
     Ui,
 };
 use egui_material_icons::icons;
-use lofty::tag::Accessor;
 use rust_i18n::t;
 
 impl Application {
@@ -19,11 +18,9 @@ impl Application {
             return;
         }
 
-        if self.file_tag.is_some() {
-            Panel::top("header_panel").show_inside(ui, |ui| {
-                self.header(ui);
-            });
-        }
+        Panel::top("header_panel").show_inside(ui, |ui| {
+            self.header(ui);
+        });
 
         Panel::bottom("footer_panel").show_inside(ui, |ui| {
             self.footer(ui);
@@ -58,34 +55,6 @@ impl Application {
     }
 
     fn header(&mut self, ui: &mut Ui) {
-        let tag = self.file_tag.as_ref().unwrap();
-
-        let artists = tag.artist().unwrap_or(t!("ui.unknown_artist"));
-        let title = tag.title().unwrap_or(
-            self.file_path
-                .as_ref()
-                .unwrap()
-                .file_prefix()
-                .unwrap()
-                .to_string_lossy(),
-        );
-        let album = tag.album().unwrap_or(t!("ui.unknown_album"));
-
-        let header_text = format!("{} - {} ({})", artists, title, album);
-
-        let header_label = Label::new(
-            RichText::new(header_text)
-                .size(16.0)
-                .color(Color32::WHITE)
-                .monospace(),
-        )
-        .truncate();
-        ui.with_layout(Layout::centered_and_justified(Direction::BottomUp), |ui| {
-            ui.add(header_label);
-        });
-    }
-
-    fn footer(&mut self, ui: &mut Ui) {
         let footer_label = Label::new(
             RichText::new(self.file_path.as_ref().unwrap().to_string_lossy())
                 .size(16.0)
@@ -96,6 +65,8 @@ impl Application {
             ui.add(footer_label);
         });
     }
+
+    fn footer(&mut self, _ui: &mut Ui) {}
 
     fn controls(&mut self, ui: &mut Ui) {
         let sink = self.audio_sink.as_ref().unwrap();

@@ -5,7 +5,6 @@ use anyhow::{Result, anyhow};
 use eframe::{Frame, HardwareAcceleration, NativeOptions};
 use egui::{Context, Ui, ViewportBuilder, vec2};
 use egui_notify::Toasts;
-use lofty::tag::Tag;
 use rodio::{MixerDeviceSink, Player};
 use std::path::PathBuf;
 
@@ -16,7 +15,6 @@ const SUPPORTED_AUDIO_FORMATS: &[&str] = &["mp3", "wav", "flac", "ogg", "aac", "
 enum Action {
     InitAudioPlayer,
     OpenFile,
-    ReadFileTags,
     PlayFile,
 }
 
@@ -31,8 +29,6 @@ struct Application {
 
     volume_before_mute: f32,
 
-    file_tag: Option<Tag>,
-
     toasts: Toasts,
 }
 
@@ -40,7 +36,6 @@ impl Application {
     fn new(file_path: Option<PathBuf>) -> Self {
         let mut actions = vec![Action::InitAudioPlayer];
         if file_path.is_some() {
-            actions.push(Action::ReadFileTags);
             actions.push(Action::PlayFile);
         }
 
@@ -52,7 +47,6 @@ impl Application {
             audio_handle: None,
             audio_sink: None,
             volume_before_mute: 1.0,
-            file_tag: None,
             toasts: Toasts::default(),
         }
     }

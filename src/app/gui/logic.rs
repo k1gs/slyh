@@ -2,7 +2,6 @@ use crate::app::gui::{Action, Application, SUPPORTED_AUDIO_FORMATS};
 use anyhow::{Result, anyhow};
 use eframe::Frame;
 use egui::Context;
-use lofty::{file::TaggedFileExt, probe::Probe as LoftyProbe};
 use rfd::FileDialog;
 use rodio::Source;
 use rust_i18n::t;
@@ -35,15 +34,6 @@ impl Application {
                         Err(e) => {
                             self.toasts
                                 .error(t!("errors.file_open_failed", error = e.to_string()));
-                        }
-                    };
-                }
-                Action::ReadFileTags => {
-                    match self.read_file_tags() {
-                        Ok(_) => (),
-                        Err(e) => {
-                            self.toasts
-                                .error(t!("errors.read_tags_failed", error = e.to_string()));
                         }
                     };
                 }
@@ -88,27 +78,7 @@ impl Application {
         let file = file.unwrap();
         self.file_path = Some(file);
 
-        self.actions.push(Action::ReadFileTags);
         self.actions.push(Action::PlayFile);
-
-        Ok(())
-    }
-
-    fn read_file_tags(&mut self) -> Result<()> {
-        if self.file_path.is_none() {
-            return Err(anyhow!("No file selected"));
-        }
-
-        let tagged_file = LoftyProbe::open(self.file_path.as_ref().unwrap())?
-            .guess_file_type()?
-            .read()?;
-
-        let mut tag = tagged_file.primary_tag();
-        if tag.is_none() {
-            tag = tagged_file.first_tag();
-        }
-
-        self.file_tag = tag.cloned();
 
         Ok(())
     }
