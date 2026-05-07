@@ -50,10 +50,15 @@ impl Application {
             }
         }
 
-        if let Some(sink) = &self.audio_sink
-            && !sink.is_paused()
-        {
-            ctx.request_repaint_after_secs(1.0 / 60.0);
+        if let Some(sink) = &self.audio_sink {
+            if !sink.is_paused() {
+                ctx.request_repaint_after_secs(1.0 / 60.0);
+            }
+
+            self.audio_position = match sink.empty() {
+                true => 0,
+                false => sink.get_pos().as_secs(),
+            };
         }
     }
 

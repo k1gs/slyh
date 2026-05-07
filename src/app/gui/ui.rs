@@ -64,8 +64,6 @@ impl Application {
     }
 
     fn footer(&mut self, ui: &mut Ui) {
-        let sink = self.audio_sink.as_ref().unwrap();
-
         ui.with_layout(Layout::right_to_left(Align::Max), |ui| {
             fn format_time_pair(position: f32, duration: f32) -> String {
                 fn format_time(seconds: f32) -> String {
@@ -78,11 +76,8 @@ impl Application {
                 format!("{}/{}", format_time(position), format_time(duration))
             }
 
-            let position = match sink.empty() {
-                true => 0,
-                false => sink.get_pos().as_secs(),
-            };
-            let progress_text = format_time_pair(position as f32, self.audio_duration as f32);
+            let progress_text =
+                format_time_pair(self.audio_position as f32, self.audio_duration as f32);
 
             let progress_label =
                 Label::new(RichText::new(progress_text).size(16.0).monospace()).selectable(false);
@@ -161,21 +156,17 @@ impl Application {
                     ui.spacing_mut().interact_size.y = 24.0;
                     ui.spacing_mut().slider_rail_height = 24.0;
 
-                    let mut position = match sink.empty() {
-                        true => 0,
-                        false => sink.get_pos().as_secs(),
-                    };
-
                     ui.spacing_mut().slider_width = ui.available_width();
-                    let progress_slider = Slider::new(&mut position, 0..=self.audio_duration)
-                        .step_by(1.0)
-                        .show_value(false)
-                        .trailing_fill(true);
+                    let progress_slider =
+                        Slider::new(&mut self.audio_position, 0..=self.audio_duration)
+                            .step_by(1.0)
+                            .show_value(false)
+                            .trailing_fill(true);
                     if ui
                         .add_enabled(!sink.empty(), progress_slider)
                         .drag_stopped()
                     {
-                        let new_position = std::time::Duration::from_secs(position);
+                        let new_position = std::time::Duration::from_secs(self.audio_position);
                         match sink.try_seek(new_position) {
                             Ok(_) => (),
                             Err(e) => {

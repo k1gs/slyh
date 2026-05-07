@@ -22,8 +22,10 @@ struct Application {
     file_path: Option<PathBuf>,
     actions: Vec<Action>,
 
-    audio_player_initialized: bool,
     audio_duration: u64,
+    audio_position: u64,
+
+    audio_player_initialized: bool,
     audio_handle: Option<MixerDeviceSink>,
     audio_sink: Option<Player>,
 
@@ -42,8 +44,9 @@ impl Application {
         Self {
             file_path,
             actions,
-            audio_player_initialized: false,
             audio_duration: 0,
+            audio_position: 0,
+            audio_player_initialized: false,
             audio_handle: None,
             audio_sink: None,
             volume_before_mute: 1.0,
