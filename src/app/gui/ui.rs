@@ -72,11 +72,13 @@ impl Application {
                     format!("{:02}:{:02}", minutes, secs)
                 }
 
-                format!("{}/{}", format_time(position), format_time(duration))
+                format!("{} / {}", format_time(position), format_time(duration))
             }
 
-            let progress_text =
-                format_time_pair(self.audio_position as f32, self.audio_duration as f32);
+            let progress_text = format_time_pair(
+                self.audio_props.position as f32,
+                self.audio_props.duration as f32,
+            );
 
             let progress_label =
                 Label::new(RichText::new(progress_text).size(8.0)).selectable(false);
@@ -112,6 +114,36 @@ impl Application {
                     sink.set_volume(0.0);
                 }
             }
+
+            ui.with_layout(Layout::left_to_right(Align::Center), |ui| {
+                let mut format_type_text = String::new();
+                if let Some(ft) = self.audio_props.format_type {
+                    format_type_text = format!("{:?} | ", ft);
+                }
+
+                let mut bitrate_text = String::new();
+                if let Some(bt) = self.audio_props.bitrate {
+                    bitrate_text = format!("{} bit | ", bt);
+                }
+
+                let mut sample_rate_text = String::new();
+                if let Some(sr) = self.audio_props.sample_rate {
+                    sample_rate_text = format!("{} hz | ", sr);
+                }
+
+                let mut channels_text = String::new();
+                if let Some(cn) = self.audio_props.channels {
+                    channels_text = format!("{} cn", cn);
+                }
+
+                let info_text = format!(
+                    "{}{}{}{}",
+                    format_type_text, bitrate_text, sample_rate_text, channels_text
+                );
+
+                let info_label = Label::new(RichText::new(info_text).size(8.0)).truncate();
+                ui.add(info_label);
+            });
         });
     }
 
@@ -164,16 +196,19 @@ impl Application {
                     ui.spacing_mut().slider_rail_height = 24.0;
 
                     ui.spacing_mut().slider_width = ui.available_width();
-                    let progress_slider =
-                        Slider::new(&mut self.audio_position, 0..=self.audio_duration)
-                            .step_by(1.0)
-                            .show_value(false)
-                            .trailing_fill(true);
+                    let progress_slider = Slider::new(
+                        &mut self.audio_props.position,
+                        0..=self.audio_props.duration,
+                    )
+                    .step_by(1.0)
+                    .show_value(false)
+                    .trailing_fill(true);
                     if ui
                         .add_enabled(!sink.empty(), progress_slider)
                         .drag_stopped()
                     {
-                        let new_position = std::time::Duration::from_secs(self.audio_position);
+                        let new_position =
+                            std::time::Duration::from_secs(self.audio_props.position);
                         match sink.try_seek(new_position) {
                             Ok(_) => (),
                             Err(e) => {

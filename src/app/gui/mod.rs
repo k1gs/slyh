@@ -5,6 +5,7 @@ use anyhow::{Result, anyhow};
 use eframe::{Frame, HardwareAcceleration, NativeOptions};
 use egui::{Context, FontData, FontDefinitions, FontFamily, FontTweak, Ui, ViewportBuilder, vec2};
 use egui_notify::Toasts;
+use lofty::file::FileType as LoftyFileType;
 use rodio::{MixerDeviceSink, Player};
 use std::path::PathBuf;
 use unicode_normalization::UnicodeNormalization;
@@ -16,7 +17,18 @@ const SUPPORTED_AUDIO_FORMATS: &[&str] = &["mp3", "wav", "flac", "ogg", "aac", "
 enum Action {
     InitAudioPlayer,
     OpenFile,
+    ReadFileProps,
     PlayFile,
+}
+
+struct AudioProperties {
+    duration: u64,
+    position: u64,
+
+    sample_rate: Option<u32>,
+    bitrate: Option<u32>,
+    channels: Option<u8>,
+    format_type: Option<LoftyFileType>,
 }
 
 struct Application {
@@ -25,8 +37,7 @@ struct Application {
 
     actions: Vec<Action>,
 
-    audio_duration: u64,
-    audio_position: u64,
+    audio_props: AudioProperties,
 
     is_looped: bool,
     is_finished: bool,
@@ -45,6 +56,7 @@ impl Application {
         let mut actions = vec![Action::InitAudioPlayer];
         let mut file_path_normilized = None;
         if let Some(fp) = &file_path {
+            actions.push(Action::ReadFileProps);
             actions.push(Action::PlayFile);
             file_path_normilized = Some(fp.to_string_lossy().nfc().collect::<String>());
         }
@@ -53,8 +65,14 @@ impl Application {
             file_path,
             file_path_normilized,
             actions,
-            audio_duration: 0,
-            audio_position: 0,
+            audio_props: AudioProperties {
+                duration: 0,
+                position: 0,
+                sample_rate: None,
+                bitrate: None,
+                channels: None,
+                format_type: None,
+            },
             is_looped: false,
             is_finished: false,
             audio_player_initialized: false,

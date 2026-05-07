@@ -21,8 +21,8 @@ en = "Failed to play audio: %{error}"
 [errors.file_open_failed]
 en = "Failed to open file: %{error}"
 
-[errors.read_tags_failed]
-en = "Failed to read file tags: %{error}"
+[errors.read_props_failed]
+en = "Failed to read file properties: %{error}"
 
 [errors.seek_failed]
 en = "Failed to seek audio: %{error}"
