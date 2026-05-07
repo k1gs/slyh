@@ -180,6 +180,7 @@ impl Application {
                     Button::new(RichText::new(icons::ICON_STOP.codepoint).size(24.0)).frame(false);
                 if ui.add(stop_button).clicked() {
                     sink.stop();
+                    self.is_finished = true;
                 }
             });
 

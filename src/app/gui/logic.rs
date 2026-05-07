@@ -171,6 +171,7 @@ impl Application {
 
         self.audio_props.duration = source.total_duration().unwrap_or_default().as_secs();
         self.audio_sink.as_ref().unwrap().append(source);
+        self.audio_sink.as_ref().unwrap().play();
         self.is_finished = false;
 
         Ok(())
