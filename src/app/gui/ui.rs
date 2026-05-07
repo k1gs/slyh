@@ -77,8 +77,39 @@ impl Application {
                 format_time_pair(self.audio_position as f32, self.audio_duration as f32);
 
             let progress_label =
-                Label::new(RichText::new(progress_text).size(16.0).monospace()).selectable(false);
+                Label::new(RichText::new(progress_text).size(16.0)).selectable(false);
             ui.add(progress_label);
+
+            ui.spacing_mut().slider_width = 80.0;
+
+            let mut volume = sink.volume();
+
+            let volume_slider = Slider::new(&mut volume, 0.0..=1.0).show_value(false);
+            if ui.add(volume_slider).dragged() {
+                sink.set_volume(volume);
+            }
+
+            let volume_button = Button::new(
+                RichText::new(if volume == 0.0 {
+                    icons::ICON_VOLUME_OFF.codepoint
+                } else if volume < 0.4 {
+                    icons::ICON_VOLUME_DOWN.codepoint
+                } else {
+                    icons::ICON_VOLUME_UP.codepoint
+                })
+                .size(16.0),
+            )
+            .frame(false);
+
+            let volume_btn_response = ui.add(volume_button);
+            if volume_btn_response.clicked() {
+                if volume == 0.0 {
+                    sink.set_volume(self.volume_before_mute);
+                } else {
+                    self.volume_before_mute = volume;
+                    sink.set_volume(0.0);
+                }
+            }
         });
     }
 
@@ -114,41 +145,6 @@ impl Application {
             });
 
             ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
-                ui.scope(|ui| {
-                    ui.spacing_mut().slider_width = 80.0;
-
-                    let mut volume = sink.volume();
-
-                    let volume_button = Button::new(
-                        RichText::new(if volume == 0.0 {
-                            icons::ICON_VOLUME_OFF.codepoint
-                        } else if volume < 0.4 {
-                            icons::ICON_VOLUME_DOWN.codepoint
-                        } else {
-                            icons::ICON_VOLUME_UP.codepoint
-                        })
-                        .size(24.0),
-                    )
-                    .frame(false);
-
-                    let volume_btn_response = ui.add(volume_button);
-                    if volume_btn_response.clicked() {
-                        if volume == 0.0 {
-                            sink.set_volume(self.volume_before_mute);
-                        } else {
-                            self.volume_before_mute = volume;
-                            sink.set_volume(0.0);
-                        }
-                    }
-
-                    volume_btn_response.on_hover_ui(|ui| {
-                        let volume_slider = Slider::new(&mut volume, 0.0..=1.0).show_value(false);
-                        if ui.add(volume_slider).dragged() {
-                            sink.set_volume(volume);
-                        }
-                    });
-                });
-
                 ui.scope(|ui| {
                     ui.spacing_mut().interact_size.y = 24.0;
                     ui.spacing_mut().slider_rail_height = 24.0;
