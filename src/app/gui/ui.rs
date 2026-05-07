@@ -147,6 +147,18 @@ impl Application {
             });
 
             ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
+                let loop_button = Button::new(
+                    RichText::new(match self.is_looped {
+                        true => icons::ICON_REPEAT_ONE.codepoint,
+                        false => icons::ICON_REPEAT.codepoint,
+                    })
+                    .size(24.0),
+                )
+                .frame(false);
+                if ui.add(loop_button).clicked() {
+                    self.is_looped = !self.is_looped;
+                }
+
                 ui.scope(|ui| {
                     ui.spacing_mut().interact_size.y = 24.0;
                     ui.spacing_mut().slider_rail_height = 24.0;

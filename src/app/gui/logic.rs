@@ -60,6 +60,13 @@ impl Application {
                 true => 0,
                 false => sink.get_pos().as_secs(),
             };
+
+            if sink.empty() && !self.is_finished {
+                match self.is_looped {
+                    true => self.actions.push(Action::PlayFile),
+                    false => self.is_finished = true,
+                }
+            }
         }
     }
 
@@ -104,6 +111,7 @@ impl Application {
 
         self.audio_duration = source.total_duration().unwrap_or_default().as_secs();
         self.audio_sink.as_ref().unwrap().append(source);
+        self.is_finished = false;
 
         Ok(())
     }

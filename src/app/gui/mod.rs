@@ -28,6 +28,9 @@ struct Application {
     audio_duration: u64,
     audio_position: u64,
 
+    is_looped: bool,
+    is_finished: bool,
+
     audio_player_initialized: bool,
     audio_handle: Option<MixerDeviceSink>,
     audio_sink: Option<Player>,
@@ -52,6 +55,8 @@ impl Application {
             actions,
             audio_duration: 0,
             audio_position: 0,
+            is_looped: false,
+            is_finished: false,
             audio_player_initialized: false,
             audio_handle: None,
             audio_sink: None,
