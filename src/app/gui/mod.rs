@@ -136,7 +136,8 @@ pub fn run_gui(file_path: Option<PathBuf>) -> Result<()> {
             .with_app_id("ru.arabianq.slyh")
             .with_title("Slyh - Audio Player")
             .with_inner_size(vec2(600.0, 100.0))
-            .with_min_inner_size(vec2(300.0, 100.0)),
+            .with_min_inner_size(vec2(300.0, 100.0))
+            .with_drag_and_drop(true),
         ..Default::default()
     };
 
