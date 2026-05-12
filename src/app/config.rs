@@ -96,9 +96,10 @@ pub fn load_config() -> Result<Config> {
         config
     } else {
         let config = Config::default();
-        save_config(&config)?;
         config
     };
+
+    save_config(&config)?;
 
     Ok(config)
 }
