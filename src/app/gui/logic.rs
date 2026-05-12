@@ -1,4 +1,7 @@
-use crate::app::gui::{Action, Application, SUPPORTED_AUDIO_FORMATS};
+use crate::app::{
+    config::load_config,
+    gui::{Action, Application, SUPPORTED_AUDIO_FORMATS},
+};
 use anyhow::{Result, anyhow};
 use eframe::Frame;
 use egui::{Context, Key};
@@ -97,11 +100,19 @@ impl Application {
     }
 
     fn init_audio_player(&mut self) -> Result<()> {
+        let config = load_config()?;
+
         self.audio_handle = Some(rodio::DeviceSinkBuilder::open_default_sink()?);
         self.audio_handle.as_mut().unwrap().log_on_drop(false);
         self.audio_sink = Some(rodio::Player::connect_new(
             self.audio_handle.as_ref().unwrap().mixer(),
         ));
+
+        self.audio_sink
+            .as_mut()
+            .unwrap()
+            .set_volume(config.audio.default_volume);
+
         Ok(())
     }
 

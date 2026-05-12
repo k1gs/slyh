@@ -1,6 +1,7 @@
 mod logic;
 mod ui;
 
+use crate::app::config::{Config, load_config};
 use anyhow::{Result, anyhow};
 use eframe::{Frame, HardwareAcceleration, NativeOptions};
 use egui::{Context, FontData, FontDefinitions, FontFamily, FontTweak, Ui, ViewportBuilder, vec2};
@@ -53,7 +54,7 @@ struct Application {
 }
 
 impl Application {
-    fn new(file_path: Option<PathBuf>) -> Self {
+    fn new(file_path: Option<PathBuf>, config: Config) -> Self {
         let mut actions = vec![Action::InitAudioPlayer];
         let mut file_path_normilized = None;
         if let Some(fp) = &file_path {
@@ -74,12 +75,12 @@ impl Application {
                 channels: None,
                 format_type: None,
             },
-            is_looped: false,
+            is_looped: config.audio.default_loop,
             is_finished: false,
             audio_player_initialized: false,
             audio_handle: None,
             audio_sink: None,
-            volume_before_mute: 1.0,
+            volume_before_mute: config.audio.default_volume,
             toasts: Toasts::default(),
         }
     }
@@ -128,14 +129,23 @@ fn setup_custom_fonts(ctx: &Context) {
 }
 
 pub fn run_gui(file_path: Option<PathBuf>) -> Result<()> {
+    let config = load_config()?;
+
     let options = NativeOptions {
-        vsync: true,
-        centered: true,
-        hardware_acceleration: HardwareAcceleration::Preferred,
+        vsync: config.egui.vsync,
+        centered: config.egui.centered,
+        hardware_acceleration: if config.egui.hardware_acceleration {
+            HardwareAcceleration::Preferred
+        } else {
+            HardwareAcceleration::Off
+        },
         viewport: ViewportBuilder::default()
             .with_app_id("ru.arabianq.slyh")
             .with_title("Slyh - Audio Player")
-            .with_inner_size(vec2(600.0, 100.0))
+            .with_inner_size(vec2(
+                config.egui.initial_window_size.0,
+                config.egui.initial_window_size.1,
+            ))
             .with_min_inner_size(vec2(300.0, 100.0))
             .with_drag_and_drop(true),
         ..Default::default()
@@ -147,7 +157,7 @@ pub fn run_gui(file_path: Option<PathBuf>) -> Result<()> {
         Box::new(|cc| {
             egui_material_icons::initialize(&cc.egui_ctx);
             setup_custom_fonts(&cc.egui_ctx);
-            Ok(Box::new(Application::new(file_path)))
+            Ok(Box::new(Application::new(file_path, config)))
         }),
     ) {
         Ok(_) => Ok(()),
