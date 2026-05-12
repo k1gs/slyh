@@ -3,11 +3,13 @@ use serde::{Deserialize, Serialize};
 use std::{fs, path::PathBuf};
 
 #[derive(Serialize, Deserialize, Debug, Default)]
+#[serde(default)]
 pub struct LocalesConfig {
     pub force_locale: Option<String>,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
+#[serde(default)]
 pub struct EguiConfig {
     pub initial_window_size: (f32, f32),
     pub vsync: bool,
@@ -27,6 +29,7 @@ impl Default for EguiConfig {
 }
 
 #[derive(Serialize, Deserialize, Debug)]
+#[serde(default)]
 pub struct FontsConfig {
     pub scale: f32,
     pub use_system_fonts: bool,
@@ -44,6 +47,7 @@ impl Default for FontsConfig {
 }
 
 #[derive(Serialize, Deserialize, Debug)]
+#[serde(default)]
 pub struct AudioConfig {
     pub default_volume: f32,
     pub default_loop: bool,
@@ -59,6 +63,7 @@ impl Default for AudioConfig {
 }
 
 #[derive(Serialize, Deserialize, Default, Debug)]
+#[serde(default)]
 pub struct Config {
     pub locales: LocalesConfig,
     pub egui: EguiConfig,
