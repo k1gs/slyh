@@ -12,14 +12,6 @@ ru = "Путь скопирован в буфер обмена"
 en = "Audio files"
 ru = "Аудиофайлы"
 
-[ui.unknown_artist]
-en = "Unknown Artist"
-ru = "Неизвестный исполнитель"
-
-[ui.unknown_album]
-en = "Unknown Album"
-ru = "Неизвестный альбом"
-
 [errors.initialization_failed]
 en = "Failed to initialize audio player: %{error}"
 ru = "Не удалось инициализировать аудиоплеер: %{error}"
