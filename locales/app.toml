@@ -2,33 +2,44 @@ _version = 2
 
 [message.welcome]
 en = "Drag file here or click to open file dialog."
+ru = "Перетащите файл сюда или кликните, чтобы выбрать файл."
 
 [message.path_copied]
 en = "Path copied to clipboard"
+ru = "Путь скопирован в буфер обмена"
 
 [file_dialog.filter_name]
 en = "Audio files"
+ru = "Аудиофайлы"
 
 [ui.unknown_artist]
 en = "Unknown Artist"
+ru = "Неизвестный исполнитель"
 
 [ui.unknown_album]
 en = "Unknown Album"
+ru = "Неизвестный альбом"
 
 [errors.initialization_failed]
 en = "Failed to initialize audio player: %{error}"
+ru = "Не удалось инициализировать аудиоплеер: %{error}"
 
 [errors.playback_failed]
 en = "Failed to play audio: %{error}"
+ru = "Ошибка воспроизведения аудио: %{error}"
 
 [errors.file_open_failed]
 en = "Failed to open file: %{error}"
+ru = "Не удалось открыть файл: %{error}"
 
 [errors.read_props_failed]
 en = "Failed to read file properties: %{error}"
+ru = "Не удалось прочитать свойства файла: %{error}"
 
 [errors.seek_failed]
 en = "Failed to seek audio: %{error}"
+ru = "Ошибка при перемотке аудио: %{error}"
 
 [errors.new_instance_failed]
 en = "Failed to start Slyh instance: %{error}"
+ru = "Не удалось запустить экземпляр Slyh: %{error}"
