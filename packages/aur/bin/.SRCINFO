@@ -1,0 +1,34 @@
+pkgbase = slyh-bin
+	pkgdesc = Simple yet powerful audio player
+	pkgver = 1.0.0
+	pkgrel = 1
+	url = https://github.com/arabianq/slyh
+	arch = x86_64
+	arch = aarch64
+	license = MIT
+	provides = slyh
+	conflicts = slyh
+	depends = glibc
+	depends = gcc-libs
+	depends = alsa-lib
+	options = !strip
+
+	source_x86_64 = https://github.com/arabianq/slyh/releases/download/v1.0.0/slyh-linux-x86_64
+	source_x86_64 = https://github.com/arabianq/slyh/raw/v1.0.0/LICENSE
+	source_x86_64 = https://github.com/arabianq/slyh/raw/v1.0.0/assets/slyh.desktop
+	source_x86_64 = https://github.com/arabianq/slyh/raw/v1.0.0/assets/icon.png
+	sha256sums_x86_64 = SKIP
+	sha256sums_x86_64 = SKIP
+	sha256sums_x86_64 = SKIP
+	sha256sums_x86_64 = SKIP
+
+	source_aarch64 = https://github.com/arabianq/slyh/releases/download/v1.0.0/slyh-linux-aarch64
+	source_aarch64 = https://github.com/arabianq/slyh/raw/v1.0.0/LICENSE
+	source_aarch64 = https://github.com/arabianq/slyh/raw/v1.0.0/assets/slyh.desktop
+	source_aarch64 = https://github.com/arabianq/slyh/raw/v1.0.0/assets/icon.png
+	sha256sums_aarch64 = SKIP
+	sha256sums_aarch64 = SKIP
+	sha256sums_aarch64 = SKIP
+	sha256sums_aarch64 = SKIP
+
+pkgname = slyh-bin

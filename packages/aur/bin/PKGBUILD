@@ -1,0 +1,33 @@
+# Maintainer: ArabianQ <arabianq@yandex.ru>
+pkgname=slyh-bin
+pkgver=1.0.0
+pkgrel=1
+pkgdesc="Simple crossplatform audio player"
+arch=('x86_64' 'aarch64')
+url="https://github.com/arabianq/slyh"
+license=('MIT')
+provides=('slyh')
+conflicts=('slyh')
+depends=('glibc' 'gcc-libs' 'alsa-lib')
+options=('!strip')
+
+source_x86_64=("${url}/releases/download/v${pkgver}/slyh-linux-x86_64"
+               "${url}/raw/v${pkgver}/LICENSE"
+               "${url}/raw/v${pkgver}/assets/slyh.desktop"
+               "${url}/raw/v${pkgver}/assets/icon.png")
+source_aarch64=("${url}/releases/download/v${pkgver}/slyh-linux-aarch64"
+                "${url}/raw/v${pkgver}/LICENSE"
+                "${url}/raw/v${pkgver}/assets/slyh.desktop"
+                "${url}/raw/v${pkgver}/assets/icon.png")
+
+sha256sums_x86_64=('SKIP' 'SKIP' 'SKIP' 'SKIP')
+sha256sums_aarch64=('SKIP' 'SKIP' 'SKIP' 'SKIP')
+
+package() {
+    install -Dm755 "${srcdir}/slyh-linux-${CARCH}" "${pkgdir}/usr/bin/slyh"
+
+    install -Dm644 "${srcdir}/slyh.desktop" "${pkgdir}/usr/share/applications/slyh.desktop"
+    install -Dm644 "${srcdir}/icon.png" "${pkgdir}/usr/share/icons/hicolor/128x128/apps/slyh.png"
+
+    install -Dm644 "${srcdir}/LICENSE" "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE"
+}

@@ -1,0 +1,30 @@
+# Maintainer: ArabianQ <arabianq@yandex.ru>
+pkgname=slyh
+pkgver=1.0.0
+pkgrel=1
+pkgdesc="Simple crossplatform audio player"
+arch=('x86_64' 'aarch64')
+url="https://github.com/arabianq/slyh"
+license=('MIT')
+depends=('glibc' 'gcc-libs' 'alsa-lib')
+makedepends=('cargo' 'cmake' 'clang')
+source=("${pkgname}-${pkgver}.tar.gz::https://github.com/arabianq/slyh/archive/refs/tags/v${pkgver}.tar.gz")
+sha256sums=('SKIP')
+
+build() {
+    cd "${pkgname}-${pkgver}"
+    export RUSTUP_TOOLCHAIN=stable
+    export CARGO_TARGET_DIR=target
+    cargo build --release --locked
+}
+
+package() {
+    cd "${pkgname}-${pkgver}"
+
+    install -Dm755 "target/release/slyh" "${pkgdir}/usr/bin/slyh"
+
+    install -Dm644 "assets/slyh.desktop" "${pkgdir}/usr/share/applications/slyh.desktop"
+    install -Dm644 "assets/icon.png" "${pkgdir}/usr/share/icons/hicolor/128x128/apps/slyh.png"
+
+    install -Dm644 "LICENSE" "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE"
+}

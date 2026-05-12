@@ -1,0 +1,18 @@
+pkgbase = slyh
+	pkgdesc = Simple yet powerful audio player
+	pkgver = 1.0.0
+	pkgrel = 1
+	url = https://github.com/arabianq/slyh
+	arch = x86_64
+	arch = aarch64
+	license = MIT
+	makedepends = cargo
+	makedepends = cmake
+	makedepends = clang
+	depends = glibc
+	depends = gcc-libs
+	depends = alsa-lib
+	source = slyh-1.0.0.tar.gz::https://github.com/arabianq/slyh/archive/refs/tags/v1.0.0.tar.gz
+	sha256sums = SKIP
+
+pkgname = slyh

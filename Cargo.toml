@@ -38,3 +38,14 @@ lofty = "0.24.0"
 serde = { version = "1.0.228", features = ["derive"] }
 toml = "1.1.2"
 dirs = "6.0.0"
+
+[package.metadata.deb]
+maintainer = "ArabianQ <arabianq@yandex.ru>"
+copyright = "2024, ArabianQ"
+license-file = ["LICENSE", "4"]
+depends = "$auto"
+assets = [
+    ["target/release/slyh", "usr/bin/", "755"],
+    ["assets/slyh.desktop", "usr/share/applications/", "644"],
+    ["assets/icon.png", "usr/share/icons/hicolor/128x128/apps/slyh.png", "644"]
+]

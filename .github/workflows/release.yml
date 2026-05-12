@@ -1,0 +1,168 @@
+name: Release
+
+permissions:
+  contents: write
+  packages: write
+
+on:
+  release:
+    types: [created]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Tag to attach assets to (e.g. v1.0.0)"
+        required: false
+
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    outputs:
+      tag: ${{ steps.tag.outputs.tag }}
+    steps:
+      - name: Determine tag to use
+        id: tag
+        run: |
+          set -euo pipefail
+          INPUT_TAG="${{ github.event.inputs.tag || '' }}"
+          if [ -n "$INPUT_TAG" ]; then
+            echo "tag=$INPUT_TAG" >> $GITHUB_OUTPUT
+          elif [ -n "${{ github.event.release.tag_name || '' }}" ]; then
+            echo "tag=${{ github.event.release.tag_name }}" >> $GITHUB_OUTPUT
+          elif [[ "${GITHUB_REF:-}" =~ ^refs/tags/(.+)$ ]]; then
+            echo "tag=${BASH_REMATCH[1]}" >> $GITHUB_OUTPUT
+          else
+            LATEST_JSON=$(curl -sSf -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" -H "Accept: application/vnd.github+json" "https://api.github.com/repos/${{ github.repository }}/releases/latest" || true)
+            TAG_NAME=$(echo "$LATEST_JSON" | jq -r '.tag_name // empty')
+            if [ -n "$TAG_NAME" ]; then
+              echo "tag=$TAG_NAME" >> $GITHUB_OUTPUT
+            else
+              echo "tag=" >> $GITHUB_OUTPUT
+            fi
+          fi
+
+      - name: Fail if no tag determined
+        if: ${{ steps.tag.outputs.tag == '' }}
+        run: |
+          echo "No tag determined"
+          sh -c 'exit 1'
+
+  build-release:
+    needs: prepare
+    name: Build ${{ matrix.os }} (${{ matrix.target }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            target: x86_64-unknown-linux-gnu
+            name: linux-x86_64
+          - os: ubuntu-latest
+            target: aarch64-unknown-linux-gnu
+            name: linux-aarch64
+          - os: macos-latest
+            target: aarch64-apple-darwin
+            name: macos-aarch64
+          - os: macos-latest
+            target: x86_64-apple-darwin
+            name: macos-x86_64
+          - os: windows-latest
+            target: x86_64-pc-windows-msvc
+            name: windows-x86_64
+          - os: windows-latest
+            target: aarch64-pc-windows-msvc
+            name: windows-aarch64
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.prepare.outputs.tag }}
+
+      - name: Install dependencies (Ubuntu)
+        if: startsWith(matrix.os, 'ubuntu')
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libasound2-dev libclang-dev gcc-aarch64-linux-gnu libc6-dev-arm64-cross pkg-config
+          if [ "${{ matrix.target }}" = "aarch64-unknown-linux-gnu" ]; then
+            echo "CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER=aarch64-linux-gnu-gcc" >> $GITHUB_ENV
+            echo "PKG_CONFIG_ALLOW_CROSS=1" >> $GITHUB_ENV
+          fi
+
+      - name: Setup Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+
+      - name: Build binary
+        run: cargo build --release --locked --target ${{ matrix.target }}
+
+      - name: Rename and upload
+        shell: bash
+        run: |
+          EXT=""
+          if [[ "${{ matrix.os }}" == windows-* ]]; then
+            EXT=".exe"
+          fi
+          BIN_PATH="target/${{ matrix.target }}/release/slyh${EXT}"
+          OUT_NAME="slyh-${{ matrix.name }}${EXT}"
+          mv "$BIN_PATH" "$OUT_NAME"
+          echo "OUT_NAME=$OUT_NAME" >> $GITHUB_ENV
+
+      - name: Upload release asset
+        uses: softprops/action-gh-release@v2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          tag_name: ${{ needs.prepare.outputs.tag }}
+          files: ${{ env.OUT_NAME }}
+
+  build-deb:
+    needs: prepare
+    name: Build and Upload Debian Package
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.prepare.outputs.tag }}
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libasound2-dev libclang-dev
+
+      - name: Setup Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Install cargo-deb
+        run: cargo install --locked cargo-deb
+
+      - name: Build .deb
+        run: cargo deb
+
+      - name: Upload .deb to release
+        uses: softprops/action-gh-release@v2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          tag_name: ${{ needs.prepare.outputs.tag }}
+          files: target/debian/*.deb
+
+  flatpak-release:
+    needs: prepare
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/flathub-infra/flatpak-github-actions:freedesktop-24.08
+      options: --privileged
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.prepare.outputs.tag }}
+
+      - name: Build Flatpak
+        uses: flatpak/flatpak-github-actions/flatpak-builder@v6
+        with:
+          bundle: ru.arabianq.slyh.flatpak
+          manifest-path: packages/flatpak/ru.arabianq.slyh.yaml
+          cache: true
+          branch: master
+          build-bundle: true
