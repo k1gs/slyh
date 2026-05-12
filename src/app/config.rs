@@ -5,7 +5,7 @@ use std::{fs, path::PathBuf};
 #[derive(Serialize, Deserialize, Debug, Default)]
 #[serde(default)]
 pub struct LocalesConfig {
-    pub force_locale: Option<String>,
+    pub force_locale: String,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -100,8 +100,7 @@ pub fn load_config() -> Result<Config> {
         let config: Config = toml::from_slice(&config_data)?;
         config
     } else {
-        let config = Config::default();
-        config
+        Config::default()
     };
 
     save_config(&config)?;

@@ -16,10 +16,10 @@ struct Cli {
 fn main() -> Result<()> {
     let config = app::config::load_config()?;
 
-    let preffered_locale = config
-        .locales
-        .force_locale
-        .unwrap_or(sys_locale::get_locale().unwrap_or(String::from("en-US")));
+    let preffered_locale = match config.locales.force_locale.is_empty() {
+        true => sys_locale::get_locale().unwrap_or(String::from("en-US")),
+        false => config.locales.force_locale.clone(),
+    };
     rust_i18n::set_locale(&preffered_locale);
 
     let args = Cli::parse();

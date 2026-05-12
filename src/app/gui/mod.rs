@@ -127,18 +127,18 @@ fn add_font(font_name: &str, font_bytes: &[u8], fonts: &mut FontDefinitions) -> 
 fn load_system_fonts(fonts: &mut FontDefinitions) -> Result<()> {
     let config = load_config()?;
 
-    let sans_fonts = if let Some(locale) = &config.locales.force_locale {
-        let (_, fonts) = find_for_locale(locale, FontStyle::Sans);
-        fonts
-    } else {
+    let sans_fonts = if config.locales.force_locale.is_empty() {
         let (_, _, fonts) = find_for_system_locale(FontStyle::Sans);
         fonts
+    } else {
+        let (_, fonts) = find_for_locale(&config.locales.force_locale, FontStyle::Sans);
+        fonts
     };
-    let serif_fonts = if let Some(locale) = &config.locales.force_locale {
-        let (_, fonts) = find_for_locale(locale, FontStyle::Serif);
+    let serif_fonts = if config.locales.force_locale.is_empty() {
+        let (_, _, fonts) = find_for_system_locale(FontStyle::Serif);
         fonts
     } else {
-        let (_, _, fonts) = find_for_system_locale(FontStyle::Serif);
+        let (_, fonts) = find_for_locale(&config.locales.force_locale, FontStyle::Serif);
         fonts
     };
     let system_fonts = [sans_fonts, serif_fonts].concat();
