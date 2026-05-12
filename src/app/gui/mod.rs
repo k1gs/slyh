@@ -170,7 +170,7 @@ pub fn run_gui(file_path: Option<PathBuf>) -> Result<()> {
             .with_app_id("ru.arabianq.slyh")
             .with_title("Slyh - Audio Player")
             .with_icon(eframe::icon_data::from_png_bytes(include_bytes!(
-                "../../../icon.png"
+                "../../../assets/icon.png"
             ))?)
             .with_inner_size(vec2(
                 config.egui.initial_window_size.0,
