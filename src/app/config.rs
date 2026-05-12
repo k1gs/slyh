@@ -26,9 +26,21 @@ impl Default for EguiConfig {
     }
 }
 
-#[derive(Serialize, Deserialize, Debug, Default)]
-pub struct GuiConfig {
-    pub use_system_font: bool,
+#[derive(Serialize, Deserialize, Debug)]
+pub struct FontsConfig {
+    pub scale: f32,
+    pub use_system_fonts: bool,
+    pub enable_hinting: bool,
+}
+
+impl Default for FontsConfig {
+    fn default() -> Self {
+        Self {
+            scale: 1.0,
+            use_system_fonts: true,
+            enable_hinting: true,
+        }
+    }
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -50,7 +62,7 @@ impl Default for AudioConfig {
 pub struct Config {
     pub locales: LocalesConfig,
     pub egui: EguiConfig,
-    pub gui: GuiConfig,
+    pub fonts: FontsConfig,
     pub audio: AudioConfig,
 }
 

@@ -8,7 +8,8 @@ use egui::{Context, FontData, FontDefinitions, FontFamily, FontTweak, Ui, Viewpo
 use egui_notify::Toasts;
 use lofty::file::FileType as LoftyFileType;
 use rodio::{MixerDeviceSink, Player};
-use std::path::PathBuf;
+use std::{fs, path::PathBuf};
+use system_fonts::{FontStyle, FoundFontSource, find_for_locale, find_for_system_locale};
 use unicode_normalization::UnicodeNormalization;
 
 // This list does not represent all supported formats, just the ones that will be shown in the file dialog.
@@ -96,36 +97,62 @@ impl eframe::App for Application {
     }
 }
 
-fn setup_custom_fonts(ctx: &Context) {
-    let mut fonts = FontDefinitions::default();
-    let custom_font_key = "default_custom_font";
+fn add_font(font_name: &str, font_bytes: &[u8], fonts: &mut FontDefinitions) -> Result<()> {
+    let config = load_config()?;
 
-    let font_data = FontData::from_static(include_bytes!(
-        "../../../assets/Curtsweeper-Regular.otf"
-    ))
-    .tweak(FontTweak {
-        hinting_override: Some(true),
-        scale: 0.5,
+    let font_data = FontData::from_owned(font_bytes.to_vec()).tweak(FontTweak {
+        scale: config.fonts.scale,
+        hinting_override: Some(config.fonts.enable_hinting),
         ..Default::default()
     });
 
     fonts
         .font_data
-        .insert(custom_font_key.to_owned(), font_data.into());
+        .insert(font_name.to_owned(), font_data.into());
 
     fonts
         .families
         .entry(FontFamily::Proportional)
         .or_default()
-        .insert(0, custom_font_key.to_owned());
-
+        .insert(0, font_name.to_owned());
     fonts
         .families
         .entry(FontFamily::Monospace)
         .or_default()
-        .insert(0, custom_font_key.to_owned());
+        .insert(0, font_name.to_owned());
 
-    ctx.set_fonts(fonts);
+    Ok(())
+}
+
+fn load_system_fonts(fonts: &mut FontDefinitions) -> Result<()> {
+    let config = load_config()?;
+
+    let sans_fonts = if let Some(locale) = &config.locales.force_locale {
+        let (_, fonts) = find_for_locale(locale, FontStyle::Sans);
+        fonts
+    } else {
+        let (_, _, fonts) = find_for_system_locale(FontStyle::Sans);
+        fonts
+    };
+    let serif_fonts = if let Some(locale) = &config.locales.force_locale {
+        let (_, fonts) = find_for_locale(locale, FontStyle::Serif);
+        fonts
+    } else {
+        let (_, _, fonts) = find_for_system_locale(FontStyle::Serif);
+        fonts
+    };
+    let system_fonts = [sans_fonts, serif_fonts].concat();
+
+    for font in system_fonts.iter() {
+        let font_bytes = match &font.source {
+            FoundFontSource::Path(path) => fs::read(path)?,
+            FoundFontSource::Bytes(bytes) => bytes.to_vec(),
+        };
+
+        add_font(&font.key, &font_bytes, fonts)?;
+    }
+
+    Ok(())
 }
 
 pub fn run_gui(file_path: Option<PathBuf>) -> Result<()> {
@@ -155,8 +182,21 @@ pub fn run_gui(file_path: Option<PathBuf>) -> Result<()> {
         "Slyh",
         options,
         Box::new(|cc| {
+            let mut fonts = FontDefinitions::default();
+
             egui_material_icons::initialize(&cc.egui_ctx);
-            setup_custom_fonts(&cc.egui_ctx);
+
+            add_font(
+                "slyh_custom_font",
+                include_bytes!("../../../assets/Curtsweeper-Regular.otf"),
+                &mut fonts,
+            )?;
+            if config.fonts.use_system_fonts {
+                load_system_fonts(&mut fonts)?;
+            }
+
+            cc.egui_ctx.set_fonts(fonts);
+
             Ok(Box::new(Application::new(file_path, config)))
         }),
     ) {
