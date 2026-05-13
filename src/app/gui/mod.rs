@@ -141,9 +141,19 @@ fn load_system_fonts(fonts: &mut FontDefinitions) -> Result<()> {
         let (_, fonts) = find_for_locale(&config.locales.force_locale, FontStyle::Serif);
         fonts
     };
-    let system_fonts = [sans_fonts, serif_fonts].concat();
 
-    for font in system_fonts.iter() {
+    let (_, system_fallback_en) = find_for_locale("en", FontStyle::Sans);
+    let (_, system_fallback_ja) = find_for_locale("ja", FontStyle::Sans);
+
+    let system_fonts = [
+        sans_fonts,
+        serif_fonts,
+        system_fallback_en,
+        system_fallback_ja,
+    ]
+    .concat();
+
+    for font in system_fonts.iter().rev() {
         let font_bytes = match &font.source {
             FoundFontSource::Path(path) => fs::read(path)?,
             FoundFontSource::Bytes(bytes) => bytes.to_vec(),
