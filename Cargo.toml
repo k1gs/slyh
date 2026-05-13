@@ -51,4 +51,4 @@ name = "Slyh"
 identifier = "ru.arabianq.slyh"
 icon = ["assets/icon.png"]
 
-category = "AudioVideo;Audio"
+category = "public.app-category.music"
