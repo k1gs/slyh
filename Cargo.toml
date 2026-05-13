@@ -9,6 +9,13 @@ readme = "README.md"
 homepage = "https://slyh.arabianq.ru"
 repository = "https://github.com/arabianq/slyh"
 
+[profile.release]
+strip = true
+lto = true
+codegen-units = 1
+opt-level = "z"
+panic = "abort"
+
 [dependencies]
 anyhow = "1.0.102"
 rust-i18n = "4.0.0"
