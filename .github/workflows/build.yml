@@ -71,6 +71,10 @@ jobs:
         if: startsWith(matrix.os, 'macos') || startsWith(matrix.os, 'ubuntu')
         run: cargo install cargo-bundle
 
+      - name: Install cargo-wix (Windows)
+        if: startsWith(matrix.os, 'windows')
+        run: cargo install cargo-wix
+
       - name: Build macOS App Bundle & DMG
         if: startsWith(matrix.os, 'macos')
         run: |
@@ -86,9 +90,11 @@ jobs:
           cargo bundle --release --format deb --target ${{ matrix.target }}
           cargo bundle --release --format appimage --target ${{ matrix.target }}
 
-      - name: Build binary (Windows)
+      - name: Build binary and MSI (Windows)
         if: startsWith(matrix.os, 'windows')
-        run: cargo build --release --locked --target ${{ matrix.target }}
+        run: |
+          cargo build --release --locked --target ${{ matrix.target }}
+          cargo wix --target ${{ matrix.target }}
 
       - name: Upload macOS DMG
         if: startsWith(matrix.os, 'macos')
@@ -97,12 +103,14 @@ jobs:
           name: slyh-${{ matrix.name }}-dmg
           path: slyh-${{ matrix.name }}.dmg
 
-      - name: Upload Windows Binary
+      - name: Upload Windows Assets
         if: startsWith(matrix.os, 'windows')
         uses: actions/upload-artifact@v4
         with:
-          name: slyh-${{ matrix.name }}-binary
-          path: target/${{ matrix.target }}/release/slyh.exe
+          name: slyh-${{ matrix.name }}-assets
+          path: |
+            target/${{ matrix.target }}/release/slyh.exe
+            target/wix/*.msi
 
       - name: Upload Linux Bundles
         if: startsWith(matrix.os, 'ubuntu')

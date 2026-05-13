@@ -108,6 +108,10 @@ jobs:
         if: startsWith(matrix.os, 'macos') || startsWith(matrix.os, 'ubuntu')
         run: cargo install cargo-bundle
 
+      - name: Install cargo-wix (Windows)
+        if: startsWith(matrix.os, 'windows')
+        run: cargo install cargo-wix
+
       - name: Build macOS App Bundle & DMG
         if: startsWith(matrix.os, 'macos')
         run: |
@@ -123,9 +127,11 @@ jobs:
           cargo bundle --release --format deb --target ${{ matrix.target }}
           cargo bundle --release --format appimage --target ${{ matrix.target }}
 
-      - name: Build binary (Windows)
+      - name: Build binary and MSI (Windows)
         if: startsWith(matrix.os, 'windows')
-        run: cargo build --release --locked --target ${{ matrix.target }}
+        run: |
+          cargo build --release --locked --target ${{ matrix.target }}
+          cargo wix --target ${{ matrix.target }}
 
       - name: Collect Release Files
         shell: bash
@@ -136,6 +142,7 @@ jobs:
             mv "slyh-${{ matrix.name }}.dmg" release_assets/
           elif [[ "${{ matrix.os }}" == windows-* ]]; then
             mv "target/${{ matrix.target }}/release/slyh.exe" "release_assets/slyh-${{ matrix.name }}.exe"
+            mv target/wix/*.msi release_assets/ || true
           elif [[ "${{ matrix.os }}" == ubuntu-* ]]; then
             mv target/${{ matrix.target }}/release/bundle/deb/*.deb release_assets/ || true
             mv target/${{ matrix.target }}/release/bundle/appimage/*.AppImage release_assets/ || true
