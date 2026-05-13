@@ -67,7 +67,21 @@ jobs:
         with:
           targets: ${{ matrix.target }}
 
-      - name: Build binary
+      - name: Install cargo-bundle (macOS)
+        if: startsWith(matrix.os, 'macos')
+        run: cargo install cargo-bundle
+
+      - name: Build macOS App Bundle & DMG
+        if: startsWith(matrix.os, 'macos')
+        run: |
+          cargo bundle --release --locked --format osx --target ${{ matrix.target }}
+          APP_PATH="target/${{ matrix.target }}/release/bundle/osx/Slyh.app"
+          
+          DMG_NAME="slyh-${{ matrix.name }}.dmg"
+          hdiutil create -volname "Slyh" -srcfolder "$APP_PATH" -ov -format UDZO "$DMG_NAME"
+
+      - name: Build binary (Windows/Linux)
+        if: "!startsWith(matrix.os, 'macos')"
         run: cargo build --release --locked --target ${{ matrix.target }}
 
   build-deb:
@@ -84,11 +98,11 @@ jobs:
       - name: Setup Rust toolchain
         uses: dtolnay/rust-toolchain@stable
 
-      - name: Install cargo-deb
-        run: cargo install --locked cargo-deb
+      - name: Install cargo-bundle
+        run: cargo install cargo-bundle
 
       - name: Build .deb
-        run: cargo deb
+        run: cargo bundle --release --locked --format deb
 
   flatpak-build:
     name: Build Flatpak
