@@ -46,9 +46,11 @@ lofty = "0.24.0"
 serde = { version = "1.0.228", features = ["derive"] }
 toml = "1.1.2"
 dirs = "6.0.0"
+
+[target.'cfg(windows)'.dependencies]
 winres = "0.1.12"
 
-[build-dependencies]
+[target.'cfg(windows)'.build-dependencies]
 winres = "0.1.12"
 
 [package.metadata.bundle]
