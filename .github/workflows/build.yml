@@ -84,8 +84,8 @@ jobs:
         if: "!startsWith(matrix.os, 'macos')"
         run: cargo build --release --locked --target ${{ matrix.target }}
 
-  build-deb:
-    name: Build Debian Package
+  build-linux-bundles:
+    name: Build Linux Bundles (DEB, AppImage)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -101,8 +101,10 @@ jobs:
       - name: Install cargo-bundle
         run: cargo install cargo-bundle
 
-      - name: Build .deb
-        run: cargo bundle --release --format deb
+      - name: Build .deb and .AppImage
+        run: |
+          cargo bundle --release --format deb
+          cargo bundle --release --format appimage
 
   flatpak-build:
     name: Build Flatpak

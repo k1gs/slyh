@@ -142,9 +142,9 @@ jobs:
           tag_name: ${{ needs.prepare.outputs.tag }}
           files: ${{ env.OUT_NAME }}
 
-  build-deb:
+  build-linux-bundles:
     needs: prepare
-    name: Build and Upload Debian Package
+    name: Build and Upload Linux Bundles (DEB, AppImage)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -162,15 +162,19 @@ jobs:
       - name: Install cargo-bundle
         run: cargo install cargo-bundle
 
-      - name: Build .deb
-        run: cargo bundle --release --format deb
+      - name: Build .deb and .AppImage
+        run: |
+          cargo bundle --release --format deb
+          cargo bundle --release --format appimage
 
-      - name: Upload .deb to release
+      - name: Upload bundles to release
         uses: softprops/action-gh-release@v2
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           tag_name: ${{ needs.prepare.outputs.tag }}
-          files: target/release/bundle/deb/*.deb
+          files: |
+            target/release/bundle/deb/*.deb
+            target/release/bundle/appimage/*.AppImage
 
   flatpak-release:
     needs: prepare
