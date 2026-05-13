@@ -188,6 +188,7 @@ pub fn run_gui(file_path: Option<PathBuf>) -> Result<()> {
             ))
             .with_min_inner_size(vec2(300.0, 100.0))
             .with_max_inner_size(vec2(f32::INFINITY, 100.0))
+            .with_maximize_button(false)
             .with_drag_and_drop(true),
         ..Default::default()
     };
