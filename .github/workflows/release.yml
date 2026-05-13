@@ -104,8 +104,8 @@ jobs:
         with:
           targets: ${{ matrix.target }}
 
-      - name: Install cargo-bundle (macOS)
-        if: startsWith(matrix.os, 'macos')
+      - name: Install cargo-bundle (macOS/Linux)
+        if: startsWith(matrix.os, 'macos') || startsWith(matrix.os, 'ubuntu')
         run: cargo install cargo-bundle
 
       - name: Build macOS App Bundle & DMG
@@ -113,68 +113,40 @@ jobs:
         run: |
           cargo bundle --release --format osx --target ${{ matrix.target }}
           APP_PATH="target/${{ matrix.target }}/release/bundle/osx/Slyh.app"
-          
+
           DMG_NAME="slyh-${{ matrix.name }}.dmg"
           hdiutil create -volname "Slyh" -srcfolder "$APP_PATH" -ov -format UDZO "$DMG_NAME"
-          echo "OUT_NAME=$DMG_NAME" >> $GITHUB_ENV
 
-      - name: Build binary (Windows/Linux)
-        if: "!startsWith(matrix.os, 'macos')"
+      - name: Build Linux Bundles
+        if: startsWith(matrix.os, 'ubuntu')
+        run: |
+          cargo bundle --release --format deb --target ${{ matrix.target }}
+          cargo bundle --release --format appimage --target ${{ matrix.target }}
+
+      - name: Build binary (Windows)
+        if: startsWith(matrix.os, 'windows')
         run: cargo build --release --locked --target ${{ matrix.target }}
 
-      - name: Rename binary (Windows/Linux)
-        if: "!startsWith(matrix.os, 'macos')"
+      - name: Collect Release Files
         shell: bash
         run: |
-          EXT=""
-          if [[ "${{ matrix.os }}" == windows-* ]]; then
-            EXT=".exe"
+          mkdir -p release_assets
+
+          if [[ "${{ matrix.os }}" == macos-* ]]; then
+            mv "slyh-${{ matrix.name }}.dmg" release_assets/
+          elif [[ "${{ matrix.os }}" == windows-* ]]; then
+            mv "target/${{ matrix.target }}/release/slyh.exe" "release_assets/slyh-${{ matrix.name }}.exe"
+          elif [[ "${{ matrix.os }}" == ubuntu-* ]]; then
+            mv target/${{ matrix.target }}/release/bundle/deb/*.deb release_assets/ || true
+            mv target/${{ matrix.target }}/release/bundle/appimage/*.AppImage release_assets/ || true
           fi
-          BIN_PATH="target/${{ matrix.target }}/release/slyh${EXT}"
-          OUT_NAME="slyh-${{ matrix.name }}${EXT}"
-          mv "$BIN_PATH" "$OUT_NAME"
-          echo "OUT_NAME=$OUT_NAME" >> $GITHUB_ENV
 
-      - name: Upload release asset
+      - name: Upload release assets
         uses: softprops/action-gh-release@v2
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           tag_name: ${{ needs.prepare.outputs.tag }}
-          files: ${{ env.OUT_NAME }}
-
-  build-linux-bundles:
-    needs: prepare
-    name: Build and Upload Linux Bundles (DEB, AppImage)
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: ${{ needs.prepare.outputs.tag }}
-
-      - name: Install dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y libasound2-dev libclang-dev
-
-      - name: Setup Rust toolchain
-        uses: dtolnay/rust-toolchain@stable
-
-      - name: Install cargo-bundle
-        run: cargo install cargo-bundle
-
-      - name: Build .deb and .AppImage
-        run: |
-          cargo bundle --release --format deb
-          cargo bundle --release --format appimage
-
-      - name: Upload bundles to release
-        uses: softprops/action-gh-release@v2
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          tag_name: ${{ needs.prepare.outputs.tag }}
-          files: |
-            target/release/bundle/deb/*.deb
-            target/release/bundle/appimage/*.AppImage
+          files: release_assets/*
 
   flatpak-release:
     needs: prepare
@@ -182,12 +154,10 @@ jobs:
     container:
       image: ghcr.io/flathub-infra/flatpak-github-actions:freedesktop-24.08
       options: --privileged
-
     steps:
       - uses: actions/checkout@v4
         with:
           ref: ${{ needs.prepare.outputs.tag }}
-
       - name: Build Flatpak
         uses: flatpak/flatpak-github-actions/flatpak-builder@v6
         with:

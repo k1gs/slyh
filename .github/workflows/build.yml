@@ -67,8 +67,8 @@ jobs:
         with:
           targets: ${{ matrix.target }}
 
-      - name: Install cargo-bundle (macOS)
-        if: startsWith(matrix.os, 'macos')
+      - name: Install cargo-bundle (macOS/Linux)
+        if: startsWith(matrix.os, 'macos') || startsWith(matrix.os, 'ubuntu')
         run: cargo install cargo-bundle
 
       - name: Build macOS App Bundle & DMG
@@ -76,59 +76,42 @@ jobs:
         run: |
           cargo bundle --release --format osx --target ${{ matrix.target }}
           APP_PATH="target/${{ matrix.target }}/release/bundle/osx/Slyh.app"
-          
+
           DMG_NAME="slyh-${{ matrix.name }}.dmg"
           hdiutil create -volname "Slyh" -srcfolder "$APP_PATH" -ov -format UDZO "$DMG_NAME"
 
-      - name: Build binary (Windows/Linux)
-        if: "!startsWith(matrix.os, 'macos')"
+      - name: Build Linux Bundles
+        if: startsWith(matrix.os, 'ubuntu')
+        run: |
+          cargo bundle --release --format deb --target ${{ matrix.target }}
+          cargo bundle --release --format appimage --target ${{ matrix.target }}
+
+      - name: Build binary (Windows)
+        if: startsWith(matrix.os, 'windows')
         run: cargo build --release --locked --target ${{ matrix.target }}
-      
+
       - name: Upload macOS DMG
         if: startsWith(matrix.os, 'macos')
         uses: actions/upload-artifact@v4
         with:
-          name: slyh-${{ matrix.name }}
+          name: slyh-${{ matrix.name }}-dmg
           path: slyh-${{ matrix.name }}.dmg
-          
-      - name: Upload binary (Linux/Windows)
-        if: "!startsWith(matrix.os, 'macos')"
+
+      - name: Upload Windows Binary
+        if: startsWith(matrix.os, 'windows')
         uses: actions/upload-artifact@v4
         with:
           name: slyh-${{ matrix.name }}-binary
-          path: |
-            target/${{ matrix.target }}/release/slyh
-            target/${{ matrix.target }}/release/slyh.exe
+          path: target/${{ matrix.target }}/release/slyh.exe
 
-  build-linux-bundles:
-    name: Build Linux Bundles (DEB, AppImage)
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Install dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y libasound2-dev libclang-dev
-
-      - name: Setup Rust toolchain
-        uses: dtolnay/rust-toolchain@stable
-
-      - name: Install cargo-bundle
-        run: cargo install cargo-bundle
-
-      - name: Build .deb and .AppImage
-        run: |
-          cargo bundle --release --format deb
-          cargo bundle --release --format appimage
-
-      - name: Upload Linux Bundles (DEB, AppImage)
+      - name: Upload Linux Bundles
+        if: startsWith(matrix.os, 'ubuntu')
         uses: actions/upload-artifact@v4
         with:
-          name: linux-bundles
+          name: slyh-${{ matrix.name }}-bundles
           path: |
-            target/release/bundle/deb/*.deb
-            target/release/bundle/appimage/*.AppImage
+            target/${{ matrix.target }}/release/bundle/deb/*.deb
+            target/${{ matrix.target }}/release/bundle/appimage/*.AppImage
 
   flatpak-build:
     name: Build Flatpak
@@ -136,10 +119,8 @@ jobs:
     container:
       image: ghcr.io/flathub-infra/flatpak-github-actions:freedesktop-24.08
       options: --privileged
-
     steps:
       - uses: actions/checkout@v4
-
       - name: Build Flatpak
         uses: flatpak/flatpak-github-actions/flatpak-builder@v6
         with:
