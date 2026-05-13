@@ -94,6 +94,7 @@ jobs:
         if: startsWith(matrix.os, 'windows')
         run: |
           cargo build --release --locked --target ${{ matrix.target }}
+          cargo wix init
           cargo wix --target ${{ matrix.target }}
 
       - name: Upload macOS DMG
