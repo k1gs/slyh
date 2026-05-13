@@ -74,7 +74,7 @@ jobs:
       - name: Build macOS App Bundle & DMG
         if: startsWith(matrix.os, 'macos')
         run: |
-          cargo bundle --release --locked --format osx --target ${{ matrix.target }}
+          cargo bundle --release --format osx --target ${{ matrix.target }}
           APP_PATH="target/${{ matrix.target }}/release/bundle/osx/Slyh.app"
           
           DMG_NAME="slyh-${{ matrix.name }}.dmg"
@@ -102,7 +102,7 @@ jobs:
         run: cargo install cargo-bundle
 
       - name: Build .deb
-        run: cargo bundle --release --locked --format deb
+        run: cargo bundle --release --format deb
 
   flatpak-build:
     name: Build Flatpak
