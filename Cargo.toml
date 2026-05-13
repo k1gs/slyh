@@ -2,6 +2,7 @@
 name = "slyh"
 version = "1.0.0"
 edition = "2024"
+authors = ["arabianq"]
 description = "Simple crossplatform audio player"
 keywords = ["audio", "player"]
 license = "MIT"
@@ -45,6 +46,10 @@ lofty = "0.24.0"
 serde = { version = "1.0.228", features = ["derive"] }
 toml = "1.1.2"
 dirs = "6.0.0"
+winres = "0.1.12"
+
+[build-dependencies]
+winres = "0.1.12"
 
 [package.metadata.bundle]
 name = "Slyh"
