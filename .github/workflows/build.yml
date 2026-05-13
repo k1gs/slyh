@@ -83,6 +83,22 @@ jobs:
       - name: Build binary (Windows/Linux)
         if: "!startsWith(matrix.os, 'macos')"
         run: cargo build --release --locked --target ${{ matrix.target }}
+      
+      - name: Upload macOS DMG
+        if: startsWith(matrix.os, 'macos')
+        uses: actions/upload-artifact@v4
+        with:
+          name: slyh-${{ matrix.name }}
+          path: slyh-${{ matrix.name }}.dmg
+          
+      - name: Upload binary (Linux/Windows)
+        if: "!startsWith(matrix.os, 'macos')"
+        uses: actions/upload-artifact@v4
+        with:
+          name: slyh-${{ matrix.name }}-binary
+          path: |
+            target/${{ matrix.target }}/release/slyh
+            target/${{ matrix.target }}/release/slyh.exe
 
   build-linux-bundles:
     name: Build Linux Bundles (DEB, AppImage)
@@ -105,6 +121,14 @@ jobs:
         run: |
           cargo bundle --release --format deb
           cargo bundle --release --format appimage
+
+      - name: Upload Linux Bundles (DEB, AppImage)
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-bundles
+          path: |
+            target/release/bundle/deb/*.deb
+            target/release/bundle/appimage/*.AppImage
 
   flatpak-build:
     name: Build Flatpak
