@@ -82,11 +82,21 @@ jobs:
       - name: Install dependencies (Ubuntu)
         if: startsWith(matrix.os, 'ubuntu')
         run: |
-          sudo apt-get update
-          sudo apt-get install -y libasound2-dev libclang-dev gcc-aarch64-linux-gnu libc6-dev-arm64-cross pkg-config
           if [ "${{ matrix.target }}" = "aarch64-unknown-linux-gnu" ]; then
+            sudo dpkg --add-architecture arm64
+            sudo sed -i 's/Types: deb/Types: deb\nArchitectures: amd64/g' /etc/apt/sources.list.d/ubuntu.sources
+            
+            echo -e "Types: deb\nArchitectures: arm64\nURIs: http://ports.ubuntu.com/ubuntu-ports\nSuites: noble noble-updates noble-backports noble-security\nComponents: main universe restricted multiverse" | sudo tee /etc/apt/sources.list.d/ubuntu-ports.sources
+            
+            sudo apt-get update
+            sudo apt-get install -y gcc-aarch64-linux-gnu libc6-dev-arm64-cross pkg-config libasound2-dev:arm64 libclang-dev
+            
             echo "CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER=aarch64-linux-gnu-gcc" >> $GITHUB_ENV
             echo "PKG_CONFIG_ALLOW_CROSS=1" >> $GITHUB_ENV
+            echo "PKG_CONFIG_PATH=/usr/lib/aarch64-linux-gnu/pkgconfig" >> $GITHUB_ENV
+          else
+            sudo apt-get update
+            sudo apt-get install -y libasound2-dev libclang-dev pkg-config
           fi
 
       - name: Setup Rust toolchain
