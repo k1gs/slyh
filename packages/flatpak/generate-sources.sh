@@ -1,8 +1,7 @@
 #!/bin/bash
 set -e
 
-# Run this script to generate or update cargo-sources.json for Flatpak.
-# Requires flatpak-cargo-generator.py in your PATH or downloaded.
+cd "$(dirname "$(realpath "$0")")" || exit 1
 
 if ! command -v flatpak-cargo-generator.py &> /dev/null
 then
@@ -13,3 +12,4 @@ then
 fi
 
 flatpak-cargo-generator.py ../../Cargo.lock -o cargo-sources.json
+rm flatpak-cargo-generator.py
