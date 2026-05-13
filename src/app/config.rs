@@ -12,6 +12,7 @@ pub struct LocalesConfig {
 #[serde(default)]
 pub struct EguiConfig {
     pub initial_window_size: (f32, f32),
+    pub scale_factor: f32,
     pub vsync: bool,
     pub centered: bool,
     pub hardware_acceleration: bool,
@@ -21,6 +22,7 @@ impl Default for EguiConfig {
     fn default() -> Self {
         Self {
             initial_window_size: (600.0, 100.0),
+            scale_factor: 1.0,
             vsync: true,
             centered: true,
             hardware_acceleration: true,

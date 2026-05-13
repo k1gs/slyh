@@ -212,6 +212,8 @@ pub fn run_gui(file_path: Option<PathBuf>) -> Result<()> {
 
             cc.egui_ctx.set_fonts(fonts);
 
+            cc.egui_ctx.set_zoom_factor(config.egui.scale_factor);
+
             Ok(Box::new(Application::new(file_path, config)))
         }),
     ) {
