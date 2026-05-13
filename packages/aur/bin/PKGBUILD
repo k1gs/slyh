@@ -27,7 +27,7 @@ package() {
     install -Dm755 "${srcdir}/slyh-linux-${CARCH}" "${pkgdir}/usr/bin/slyh"
 
     install -Dm644 "${srcdir}/slyh.desktop" "${pkgdir}/usr/share/applications/slyh.desktop"
-    install -Dm644 "${srcdir}/icon.png" "${pkgdir}/usr/share/icons/hicolor/128x128/apps/slyh.png"
+    install -Dm644 "${srcdir}/icon.png" "${pkgdir}/usr/share/icons/hicolor/128x128/apps/ru.arabianq.slyh.png"
 
     install -Dm644 "${srcdir}/LICENSE" "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE"
 }

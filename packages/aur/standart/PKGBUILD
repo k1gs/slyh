@@ -24,7 +24,7 @@ package() {
     install -Dm755 "target/release/slyh" "${pkgdir}/usr/bin/slyh"
 
     install -Dm644 "assets/slyh.desktop" "${pkgdir}/usr/share/applications/slyh.desktop"
-    install -Dm644 "assets/icon.png" "${pkgdir}/usr/share/icons/hicolor/128x128/apps/slyh.png"
+    install -Dm644 "assets/icon.png" "${pkgdir}/usr/share/icons/hicolor/128x128/apps/ru.arabianq.slyh.png"
 
     install -Dm644 "LICENSE" "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE"
 }

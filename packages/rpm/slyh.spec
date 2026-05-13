@@ -34,14 +34,14 @@ cargo build --release --locked
 install -Dm755 target/release/slyh %{buildroot}%{_bindir}/slyh
 
 install -Dm644 assets/slyh.desktop %{buildroot}%{_datadir}/applications/slyh.desktop
-install -Dm644 assets/icon.png %{buildroot}%{_datadir}/icons/hicolor/128x128/apps/slyh.png
+install -Dm644 assets/icon.png %{buildroot}%{_datadir}/icons/hicolor/128x128/apps/ru.arabianq.slyh.png
 
 %files
 %license LICENSE
 %doc README.md
 %{_bindir}/slyh
 %{_datadir}/applications/slyh.desktop
-%{_datadir}/icons/hicolor/128x128/apps/slyh.png
+%{_datadir}/icons/hicolor/128x128/apps/ru.arabianq.slyh.png
 
 %changelog
 %autochangelog

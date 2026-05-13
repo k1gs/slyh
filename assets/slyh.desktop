@@ -2,7 +2,7 @@
 Name=Slyh
 Comment=Simple yet powerful audio player
 Exec=slyh %u
-Icon=slyh
+Icon=ru.arabianq.slyh
 Terminal=false
 Type=Application
-Categories=Audio
+Categories=Audio;
